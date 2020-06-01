@@ -1,6 +1,7 @@
 package com.waltersteven.reddit.controller;
 
-import com.sun.mail.iap.Response;
+import com.waltersteven.reddit.dto.AuthenticationResponse;
+import com.waltersteven.reddit.dto.LoginRequest;
 import com.waltersteven.reddit.dto.RegisterRequest;
 import com.waltersteven.reddit.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -27,5 +28,10 @@ public class AuthController {
         authService.verifyAccount(token);
 
         return new ResponseEntity<>("Account Activated Successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 }
