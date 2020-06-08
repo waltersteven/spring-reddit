@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-public class    AuthService {
+public class AuthService {
 
     // These instance variables will be initialized by Lombok (@AllArgsConstructor)
     private final PasswordEncoder passwordEncoder;
@@ -76,6 +77,15 @@ public class    AuthService {
         verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token"));
 
         fetchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        org.springframework.security.core.userdetails.User principal =
+                (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return userRepository.findByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User name not found: " + principal.getUsername()));
     }
 
     @Transactional
