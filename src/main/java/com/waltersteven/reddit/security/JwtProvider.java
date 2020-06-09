@@ -49,6 +49,14 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String generateTokenWithUsername(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .signWith(getPrivateKey())
+                .setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
+                .compact();
+    }
+
     private PrivateKey getPrivateKey() {
         try {
             return (PrivateKey) keyStore.getKey("springreddit", "secret".toCharArray());
@@ -58,8 +66,7 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String jwt) {
-        parser().setSigningKey(getPublicKey()).parseClaimsJws(jwt);
-
+        Jwts.parserBuilder().setSigningKey(getPublicKey()).build().parseClaimsJws(jwt);
         return true;
     }
 
@@ -72,8 +79,9 @@ public class JwtProvider {
     }
 
     public String getUsername(String jwt) {
-        Claims claims = parser()
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getPublicKey())
+                .build()
                 .parseClaimsJws(jwt)
                 .getBody();
 
